@@ -6,7 +6,7 @@
 /*   By: gtertysh <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/03/25 18:27:54 by gtertysh          #+#    #+#             */
-/*   Updated: 2017/03/25 18:29:35 by gtertysh         ###   ########.fr       */
+/*   Updated: 2017/03/25 21:18:30 by gtertysh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,5 +14,6 @@
 # define FT_LS_H
 
 # include <unistd.h>
+# include <dirent.h>
 
 #endif
