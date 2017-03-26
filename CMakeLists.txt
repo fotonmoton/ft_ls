@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 project(ft_ls)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra -O0 -g")
 
 include_directories(inc libft/includes) # headers
 link_directories(libft) # libraries
