@@ -14,6 +14,5 @@
 
 int		main(void)
 {
-	write(1, "aa\n", 3);
-	return (0);
+	return (write(1, "aa\n", 3));
 }
