@@ -6,7 +6,7 @@
 #    By: gtertysh <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/12/14 16:54:48 by gtertysh          #+#    #+#              #
-#    Updated: 2017/03/25 18:32:30 by gtertysh         ###   ########.fr        #
+#    Updated: 2017/03/27 15:23:35 by gtertysh         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -46,7 +46,7 @@ OBJ =				$(addprefix $(OBJ_DIR), $(OBJ_FILES))
 HEADER =			ft_ls.h
 FT_LS_INC =			./inc/
 LIBFT_INC =			$(LIBFT_DIR)includes/
-INC =				-I $(LIBFT_DIR) -I $(FT_LS_INC) 
+INC =				-I $(LIBFT_DIR)includes/ -I $(FT_LS_INC) 
 
 # compiler flags
 
