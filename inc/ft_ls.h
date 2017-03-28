@@ -31,6 +31,7 @@ typedef struct 		s_flags
 	int 			a;
 	int 			R;
 	int 			t;
+	int 			col;
 }					t_flags;
 
 typedef struct 		s_dir_entity

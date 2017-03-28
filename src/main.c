@@ -32,10 +32,11 @@ int		chck_flgs(char *flg, t_flags *flgs)
 {
 	if ((!*(flg + 1)) && (flg += 1))
 		return (1);
-	if (flgs->l == 0) flgs->l = (unsigned int)ft_strchr(flg, 'l');
-	if (flgs->a == 0) flgs->a = (unsigned int)ft_strchr(flg, 'a');
-	if (flgs->R == 0) flgs->R = (unsigned int)ft_strchr(flg, 'R');
-	if (flgs->t == 0) flgs->t = (unsigned int)ft_strchr(flg, 't');
+	if (flgs->l == 0) flgs->l = (ft_strchr(flg, 'l') != NULL) ? 1 : 0;
+	if (flgs->a == 0) flgs->a = (ft_strchr(flg, 'a') != NULL) ? 1 : 0;
+	if (flgs->R == 0) flgs->R = (ft_strchr(flg, 'R') != NULL) ? 1 : 0;
+	if (flgs->t == 0) flgs->t = (ft_strchr(flg, 't') != NULL) ? 1 : 0;
+	if (flgs->col == 0) flgs->col = (ft_strchr(flg, '1') != NULL) ? 1 : 0;
 	return (0);
 }
 
@@ -53,32 +54,45 @@ void	column_out(t_list *entity)
 	t_dir_entity *d_ent;
 
 	d_ent = (t_dir_entity *)entity->content;
-	if (!d_ent->flags->a)
+	if (d_ent->flags->a)
 		printf("%s\t", d_ent->dirent->d_name);
 	else
 		if (*d_ent->dirent->d_name != '.')
-			printf("%s\t", d_ent->dirent->d_name);
+			printf("%s\t\n", d_ent->dirent->d_name);
+}
 
+void	output(t_list *del)
+{
+	ft_lstiter(del, column_out);
 }
 
 void	ft_ls(char *path, t_flags *flgs)
 {
 	DIR				*dp;
-	int 			blocks;
-	char 			*tmp_path;
+//	int 			blocks;
+//	char 			*tmp_path;
 	t_list			*dir_ent_list;
 
-	tmp_path = 0;
-	blocks = 0;
+//	tmp_path = 0;
+//	blocks = 0;
 	dir_ent_list = NULL;
 	if (!(dp = opendir(path)) || open(path, O_RDONLY) == -1)
 		put_error(path);
 	else
 	{
 		init_dir_ent_list(dp, &dir_ent_list, flgs);
-		ft_lstiter(dir_ent_list, column_out);
+		output(dir_ent_list);
 	}
 
+}
+
+void	set_flags_to_zero(t_flags *flgs)
+{
+	flgs->a = 0;
+	flgs->l = 0;
+	flgs->R = 0;
+	flgs->t = 0;
+	flgs->col = 0;
 }
 
 void	parse_input(int ac, char **av, t_flags *flgs)
@@ -87,8 +101,9 @@ void	parse_input(int ac, char **av, t_flags *flgs)
 	int 	paths;
 
 	i = 0;
+	set_flags_to_zero(flgs);
 	if (ac == 1)
-		ft_ls("./", NULL);
+		ft_ls(".", flgs);
 	else if (ac > 1)
 	{
 		while (i < ac - 1 && *av[i + 1] == '-')
