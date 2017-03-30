@@ -108,7 +108,7 @@ t_list	*extract_dirs_from_filenames(t_list *filenames, char *par_d)
 	{
 		tmp_full_path = get_full_path(par_d, filenames->content);
 		if (opendir(tmp_full_path) && (ft_strcmp(filenames->content, ".") != 0) && (ft_strcmp(filenames->content, "..") != 0))
-			fill_path_lst(&dirs, filenames->content);
+			fill_path_lst(&dirs, tmp_full_path);
 		free(tmp_full_path);
 		filenames = filenames->next;
 	}
@@ -127,7 +127,7 @@ void		ft_ls(t_list *filenames, t_list *dir_paths, t_flags *flgs,
 		sort_elms(&dir_content_lst, flgs);
 		output(dir_content_lst, par_dir, flgs);
 		if (flgs->R)
-			ft_ls(NULL, extract_dirs_from_filenames(filenames, par_dir), flgs, par_dir);
+			ft_ls(NULL, extract_dirs_from_filenames(filenames, par_dir), flgs, NULL);
 	}
 	if (dir_paths)
 	{
