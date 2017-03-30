@@ -1,6 +1,6 @@
 #include "libft.h"
 
-t_list	*SortedMerge(t_list *a, t_list *b)
+static t_list	*merge(t_list *a, t_list *b, int (*cmp)())
 {
 	t_list	*result;
 
@@ -8,24 +8,23 @@ t_list	*SortedMerge(t_list *a, t_list *b)
 
 	if (a == NULL)
 		return(b);
-	else if (b==NULL)
+	else if (b == NULL)
 		return(a);
 
-	/* Pick either a or b, and recur */
-	if (a->data <= b->data)
+	if (cmp(a->content, b->content))
 	{
 		result = a;
-		result->next = SortedMerge(a->next, b);
+		result->next = merge(a->next, b, cmp);
 	}
 	else
 	{
 		result = b;
-		result->next = SortedMerge(a, b->next);
+		result->next = merge(a, b->next, cmp);
 	}
 	return(result);
 }
 
-void	split(t_list *source, t_list **front_ptr, t_list **back_ptr)
+static void		split(t_list *source, t_list **front_ptr, t_list **back_ptr)
 {
 	t_list *fast;
 	t_list *slow;
@@ -48,13 +47,12 @@ void	split(t_list *source, t_list **front_ptr, t_list **back_ptr)
 				fast = fast->next;
 			}
 		}
-
 		*front_ptr = source;
 		*back_ptr = slow->next;
 		slow->next = NULL;
 	}
 }
-void	ft_lst_merge_sort(t_list **head_ptr, int (*cmp)())
+void			ft_lst_merge_sort(t_list **head_ptr, int (*cmp)())
 {
 	t_list	*head;
 	t_list	*a;
@@ -63,13 +61,8 @@ void	ft_lst_merge_sort(t_list **head_ptr, int (*cmp)())
 	head = *head_ptr;
 	if ((head == NULL) || (head->next == NULL))
 		return;
-
 	split(head, &a, &b);
-
-	/* Recursively sort the sublists */
 	ft_lst_merge_sort(&a, cmp);
 	ft_lst_merge_sort(&b, cmp);
-
-	/* answer = merge the two sorted lists together */
-	*head_ptr = SortedMerge(a, b);
+	*head_ptr = merge(a, b, cmp);
 }

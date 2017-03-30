@@ -3,12 +3,18 @@ project(ft_ls)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wextra -O0 -g")
 
-include_directories(inc libft/includes) # headers
 link_directories(libft) # libraries
+include_directories(inc libft/includes) # headers
 
 set(SOURCE_FILES
+        inc/ft_ls.h
         src/main.c
-        src/ft_ls.c src/parse_input.c src/flags.c src/sort.c src/output.c libft/ft_lst_merge_sort.c) # sources
+        src/ft_ls.c
+        src/parse_input.c
+        src/flags.c
+        src/sort.c
+        src/output.c
+        src/error.c libft/ft_strcmp_lex.c) # sources
 
 add_executable(ft_ls ${SOURCE_FILES}) # compilation
 

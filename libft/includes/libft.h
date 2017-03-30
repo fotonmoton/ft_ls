@@ -57,6 +57,7 @@ char				*ft_strnstr(const char *big, const char *little,
 														size_t len);
 int					ft_strcmp(const char *s1, const char *s2);
 int					ft_strncmp(const char *s1, const char *s2, size_t n);
+int					ft_strcmp_lex(const char *s1, const char *s2);
 int					ft_atoi(const char *str);
 int					ft_isalpha(int c);
 int					ft_isdigit(int c);
@@ -104,6 +105,8 @@ t_list				*ft_lststrsplit(const char *s, char c);
 t_list				*ft_lstfind(t_list *lst, void *data, size_t size);
 t_list				*ft_lst_at(t_list *l, unsigned int at);
 void				ft_lstadd_back(t_list **l, void *data, size_t size);
+void				ft_lst_merge_sort(t_list **head_ptr, int (*cmp)());
+
 void				*ft_realloc(void *old, unsigned int new_size,
 											unsigned int old_size);
 
