@@ -82,7 +82,8 @@ SRC = ft_memset.c		    \
 						    \
 	  ft_realloc.c		    \
 	  ft_read_file.c        \
-	  get_next_line.c
+	  get_next_line.c       \
+	  ft_num_len.c
 
 OBJ = $(SRC:.c=.o)
 INC = -I ./includes/

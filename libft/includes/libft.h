@@ -113,4 +113,6 @@ void				*ft_realloc(void *old, unsigned int new_size,
 char				*ft_read_file(const int fd);
 int					get_next_line(const int fd, char **line);
 
+int					ft_num_len(long num);
+
 #endif

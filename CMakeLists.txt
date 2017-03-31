@@ -14,7 +14,7 @@ set(SOURCE_FILES
         src/flags.c
         src/sort.c
         src/output.c
-        src/error.c libft/ft_strcmp_lex.c) # sources
+        src/error.c) # sources
 
 add_executable(ft_ls ${SOURCE_FILES}) # compilation
 
