@@ -6,13 +6,37 @@ void	column_or_line(t_list *entity)
 
 	d_elm = (t_dir_elm *)entity->content;
 	ft_putstr(d_elm->elm_name);
-	if (entity->next)
+	if (!entity->next)
+		ft_putstr("\n");
+	else if (d_elm->flags->col)
+		ft_putstr("\n");
+	else
+		ft_putstr("  ");
+}
+
+int 	is_hidden(char *path)
+{
+	char	*begin;
+	char	*end;
+
+	begin = path;
+	end = path + ft_strlen(path) - 1;
+	if (begin != end)
 	{
-		if (d_elm->flags->col)
-			ft_putstr("\n");
-		else
-			ft_putstr("  ");
+		while (end != begin && *end != '/')
+			end--;
+		if (end == begin)
+		{
+			if (*end == '.')
+				return (1);
+		}
+		else if (*(end + 1) == '.')
+			return (1);
 	}
+	else
+		if (*end == '.')
+			return (1);
+	return (0);
 }
 
 int		out(t_list *entity)
@@ -26,7 +50,7 @@ int		out(t_list *entity)
 		return (1);
 	}
 	else
-		if (*d_elm->elm_name != '.')
+		if (!is_hidden(d_elm->elm_name))
 		{
 			column_or_line(entity);
 			return (1);
@@ -34,25 +58,16 @@ int		out(t_list *entity)
 	return (0);
 }
 
-void	print_full_path(char *path)
+void print_full_path(t_ft_ls *s_ls, char *path)
 {
 	char 	*cur_dir_semi_n;
 
+	s_ls = s_ls;
 	cur_dir_semi_n = ft_strjoin(path, ":\n");
 	ft_putstr(cur_dir_semi_n);
 	free(cur_dir_semi_n);
 }
 
-void 	put_current_dir(char *cur_dir, t_flags *flgs)
-{
-	if (flgs->a)
-		print_full_path(cur_dir);
-	else
-	{
-		if (*cur_dir != '.')
-			print_full_path(cur_dir);
-	}
-}
 
 int		ft_lstiter_ret(t_list *lst, int (*f)(t_list *elem))
 {
@@ -68,10 +83,8 @@ int		ft_lstiter_ret(t_list *lst, int (*f)(t_list *elem))
 	return (i);
 }
 
-void output(t_list *del, char *current_dir, t_flags *flgs)
+void output(t_ft_ls *s_ls)
 {
-	if (current_dir)
-		put_current_dir(current_dir, flgs);
-	if (ft_lstiter_ret(del, out))
-		ft_putstr("\n");
+	ft_lstiter_ret(s_ls->lst_fil_meta, out);
+	ft_putstr("\n");
 }

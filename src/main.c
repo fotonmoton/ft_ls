@@ -15,20 +15,23 @@
 int		main(int argc, char **argv)
 {
 	static t_flags	flgs;
-	t_list			*str_paths[2];
-	int 			no_errors;
+	static t_ft_ls	s_ls;
+	int 			no_errors_and_valid_args;
 
-	str_paths[FILES] = NULL;
-	str_paths[DIRS] = NULL;
-	no_errors = parse_input(argc, argv, str_paths, &flgs);
-	if (str_paths[FILES] || str_paths[DIRS])
+	s_ls.flgs = &flgs;
+	s_ls.first_print = 1;
+	no_errors_and_valid_args = parse_input(argc, argv, &s_ls);
+	if (s_ls.lst_dir_paths || s_ls.lst_fil_names)
 	{
-		ft_ls(str_paths[FILES], str_paths[DIRS], &flgs, NULL);
+		if (ft_lst_len(s_ls.lst_dir_paths) == 1 && ft_lst_len(s_ls.lst_fil_names) == 0 && !s_ls.flgs->R)
+			s_ls.one_dir = 1;
+		ft_ls(&s_ls);
 	}
-	else if (no_errors)
+	else if (no_errors_and_valid_args)
 	{
-		fill_path_lst(&str_paths[DIRS], "./");
-		ft_ls(NULL, str_paths[DIRS], &flgs, NULL);
+		s_ls.no_ops = 1;
+		fill_path_lst(&s_ls.lst_dir_paths, "./");
+		ft_ls(&s_ls);
 	}
 	return 0;
 }

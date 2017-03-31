@@ -26,22 +26,24 @@ char 	*get_full_path(char *path, char *dir_ent_name)
 		return (ft_strdup(dir_ent_name));
 }
 
-void	init_dir_con_lst(t_list **dir_content_lst, t_list *filenames,
-						 t_flags *flgs, char *par_dir)
+void init_file_meta_lst(t_ft_ls *s_ls, char *full_path)
 {
 	t_dir_elm		de;
 	char 			*tmp_path;
+	t_list			*lst_rnr;
 
-	while (filenames)
+	lst_rnr = s_ls->lst_fil_names;
+	s_ls->lst_fil_meta = NULL;
+	while (lst_rnr)
 	{
-		de.flags = flgs;
+		de.flags = s_ls->flgs;
 		de.stat_buf_struc = malloc(sizeof(struct stat));
-		de.elm_name = (char *)filenames->content;
-		tmp_path = get_full_path(par_dir, de.elm_name);
+		de.elm_name = (char *)lst_rnr->content;
+		tmp_path = get_full_path(full_path, de.elm_name);
 		stat(tmp_path, de.stat_buf_struc);
-		ft_lstadd(dir_content_lst, ft_lstnew(&de, sizeof(t_dir_elm)));
+		ft_lstadd(&s_ls->lst_fil_meta, ft_lstnew(&de, sizeof(t_dir_elm)));
 		free(tmp_path);
-		filenames = filenames->next;
+		lst_rnr = lst_rnr->next;
 	}
 }
 
@@ -81,61 +83,74 @@ void	init_dir_con_lst(t_list **dir_content_lst, t_list *filenames,
 //	closedir(dp);
 //}
 
-t_list	*extract_files_from_dir(char *dir, char *par_dir)
+t_list	*extract_filenames_from_dir(char *full_path)
 {
 	DIR				*dp;
 	struct dirent	*dir_ent;
 	t_list			*dir_files;
-	char 			*tmp_path;
 
-	tmp_path = get_full_path(par_dir, dir);
-	dp = opendir(tmp_path);
+	dp = opendir(full_path);
 	dir_files = NULL;
-	while ((dir_ent = readdir(dp)))
-		fill_path_lst(&dir_files, dir_ent->d_name);
+	if (dp != NULL)
+		while ((dir_ent = readdir(dp)))
+			fill_path_lst(&dir_files, dir_ent->d_name);
 	closedir(dp);
-	free(tmp_path);
 	return (dir_files);
 }
 
-t_list	*extract_dirs_from_filenames(t_list *filenames, char *par_d)
+t_ft_ls		*extract_dirs_from_filenames(t_ft_ls *s_ls, char *full_path)
 {
-	t_list		*dirs;
-	char 		*tmp_full_path;
-	dirs = NULL;
+	char 		*full_path_with_file;
 
-	while (filenames)
+	s_ls->lst_dir_paths = NULL;
+	while (s_ls->lst_fil_names)
 	{
-		tmp_full_path = get_full_path(par_d, filenames->content);
-		if (opendir(tmp_full_path) && (ft_strcmp(filenames->content, ".") != 0) && (ft_strcmp(filenames->content, "..") != 0))
-			fill_path_lst(&dirs, tmp_full_path);
-		free(tmp_full_path);
-		filenames = filenames->next;
+		full_path_with_file = get_full_path(full_path, s_ls->lst_fil_names->content);
+		if (opendir(full_path_with_file) && (ft_strcmp(s_ls->lst_fil_names->content, ".") != 0) && (ft_strcmp(s_ls->lst_fil_names->content, "..") != 0))
+		{
+			if (s_ls->flgs->a)
+				fill_path_lst(&s_ls->lst_dir_paths, s_ls->lst_fil_names->content);
+			else if (*(char *)s_ls->lst_fil_names->content != '.')
+				fill_path_lst(&s_ls->lst_dir_paths, s_ls->lst_fil_names->content);
+		}
+		s_ls->lst_fil_names = s_ls->lst_fil_names->next;
+		free(full_path_with_file);
 	}
-	return (dirs);
+	return (s_ls);
 }
 
-void		ft_ls(t_list *filenames, t_list *dir_paths, t_flags *flgs,
-				  char *par_dir)
+void ft_ls_dir(t_ft_ls *s_ls, char *full_path)
 {
-	t_list		*dir_content_lst;
+	char 		*full_path_next;
+	t_list		*tmp_rnr;
 
-	dir_content_lst = NULL;
-	if (filenames)
+	sort_dirs(&s_ls->lst_dir_paths, s_ls->flgs);
+	tmp_rnr = s_ls->lst_dir_paths;
+	while (tmp_rnr)
 	{
-		init_dir_con_lst(&dir_content_lst, filenames, flgs, par_dir);
-		sort_elms(&dir_content_lst, flgs);
-		output(dir_content_lst, par_dir, flgs);
-		if (flgs->R)
-			ft_ls(NULL, extract_dirs_from_filenames(filenames, par_dir), flgs, NULL);
+		full_path_next = get_full_path(full_path, tmp_rnr->content);
+		s_ls->lst_fil_names = extract_filenames_from_dir(full_path_next);
+		ft_ls_fil(s_ls, full_path_next);
+		if (s_ls->flgs->R)
+			ft_ls_dir(extract_dirs_from_filenames(s_ls, full_path_next), full_path_next);
+		tmp_rnr = tmp_rnr->next;
 	}
-	if (dir_paths)
-	{
-		sort_dirs(&dir_paths, flgs);
-		while (dir_paths)
-		{
-			ft_ls(extract_files_from_dir(dir_paths->content, par_dir), NULL, flgs, dir_paths->content);
-			dir_paths = dir_paths->next;
-		}
-	}
+}
+
+void ft_ls_fil(t_ft_ls *s_ls, char *full_path)
+{
+
+	init_file_meta_lst(s_ls, full_path);
+	sort_files(&s_ls->lst_fil_meta, s_ls->flgs);
+	if (full_path && !s_ls->one_dir && !s_ls->no_ops)
+		print_full_path(s_ls, full_path);
+	output(s_ls);
+}
+
+void ft_ls(t_ft_ls *s_ls)
+{
+	if (s_ls->lst_fil_names)
+		ft_ls_fil(s_ls, NULL);
+	if (s_ls->lst_dir_paths)
+		ft_ls_dir(s_ls, NULL);
 }

@@ -54,26 +54,34 @@ typedef struct 		s_dir_elm
 	t_flags			*flags;
 }					t_dir_elm;
 
-void				ft_ls(
-						t_list *filenames,
-						t_list *dir_paths,
-						t_flags *flgs,
-						char *par_dir);
+typedef struct 		s_ft_ls
+{
+	t_list			*lst_fil_names;
+	t_list			*lst_dir_paths;
+	t_list			*lst_fil_meta;
+	int 			one_dir;
+	int 			no_ops;
+	int 			first_print;
+	t_flags			*flgs;
+}					t_ft_ls;
 
-int					parse_input(
-						int ac,
-						char **av,
-						t_list **str_paths,
-						t_flags *flgs);
+void				ft_ls(t_ft_ls *s_ls);
 
-void				init_dir_con_lst(
-						t_list **dir_content_lst, t_list *filenames,
-						t_flags *flgs, char *par_dir);
+void 				ft_ls_fil(t_ft_ls *s_ls, char *full_path);
+
+void				ft_ls_dir(t_ft_ls *s_ls, char *full_path);
+
+int					parse_input(int ac, char **av, t_ft_ls *ft_ls_strct);
+
+void				init_file_meta_lst(t_ft_ls *s_ls, char *full_path);
 
 void				fill_path_lst(t_list **path_lst, char *path);
-void				sort_elms(t_list **del, t_flags *flgs);
+void				sort_files(t_list **del, t_flags *flgs);
 void				sort_dirs(t_list **dirs, t_flags *flgs);
-void				output(t_list *del, char *current_dir, t_flags *flgs);
+
+void				output(t_ft_ls *s_ls);
+void				print_full_path(t_ft_ls *s_ls, char *path);
+
 int					chck_flgs(char *flg, t_flags *flgs);
 void				put_error(char *arg);
 
