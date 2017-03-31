@@ -25,6 +25,9 @@
 # include <sys/types.h>
 # include <errno.h>
 
+# define FILS 0
+# define DIRS 1
+
 typedef struct 		s_flags
 {
 	int 			l;
@@ -48,43 +51,42 @@ typedef struct 		s_col_len
 typedef struct 		s_dir_elm
 {
 	char 			*elm_name;
+	char 			*link_name;
 	char 			*m_time;
 	char 			*g_name;
 	char 			*u_name;
 	char 			*attr_str;
-	int 			link_fd;
-	struct stat		*stat_buf_struc;
-	t_flags			*flags;
-	t_col_len		columns_len;
+	struct stat		*stat_copy;
+	t_col_len		cols_padd;
 }					t_dir_elm;
 
 typedef struct 		s_ft_ls
 {
-	t_list			*lst_fil_names;
-	t_list			*lst_dir_paths;
-	t_list			*lst_fil_meta;
+	t_list			*lst_dir_content;
+	t_flags			*flgs;
+	t_col_len		*max_cols_padd;
+	int 			dir_content_total;
 	int 			one_dir;
 	int 			no_ops;
 	int 			first_print;
-	t_flags			*flgs;
-	t_col_len			*padding;
+	int 			files_print;
 }					t_ft_ls;
 
-void				ft_ls(t_ft_ls s_ls);
+void				ft_ls(t_ft_ls *s_ls, t_list *paths, char *curr_path);
 
-void 				ft_ls_fil(t_ft_ls *s_ls, char *full_path);
+void 				print_content(t_ft_ls *s_ls, char *full_path_curr);
 
-void				ft_ls_dir(t_ft_ls s_ls, char *full_path);
+int					parse_input(int ac, char **av, t_list **file_and_dirs,
+								   t_flags *flgs);
 
-int					parse_input(int ac, char **av, t_ft_ls *ft_ls_strct);
-
-void				init_file_meta_lst(t_ft_ls *s_ls, char *full_path);
+t_list				*init_content_node(char *full_path, char *filename,
+										 t_ft_ls *s_ls);
 
 void				fill_path_lst(t_list **path_lst, char *path);
 void				sort_files(t_list **del, t_flags *flgs);
-void				sort_dirs(t_list **dirs, t_flags *flgs);
+void				sort_paths(t_list **dirs, t_flags *flgs);
 
-void				output(t_ft_ls s_ls);
+void				output(t_ft_ls *s_ls);
 void				print_full_path(t_ft_ls *s_ls, char *path);
 
 int					chck_flgs(char *flg, t_flags *flgs);

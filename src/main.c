@@ -12,29 +12,58 @@
 
 #include "ft_ls.h"
 
+// complide with -O3 flag!!
+
+void	init_base_structs(t_ft_ls *s_ls, t_flags *flgs, t_col_len *padd,
+						  t_list **fil_dir)
+{
+	fil_dir[FILS] = NULL;
+	fil_dir[DIRS] = NULL;
+	s_ls->flgs = flgs;
+	s_ls->max_cols_padd = padd;
+	s_ls->first_print = 1;
+	s_ls->files_print = 0;
+}
+
+void	ft_ls_start(t_ft_ls *s_ls, t_list **file_and_dirs, int no_error_operands)
+{
+	if (file_and_dirs[FILS])
+	{
+		s_ls->files_print = 1;
+		sort_paths(&file_and_dirs[FILS], s_ls->flgs);
+		ft_ls(s_ls, file_and_dirs[FILS], NULL);
+		s_ls->files_print = 0;
+		s_ls->first_print = 0;
+	}
+	if (file_and_dirs[DIRS])
+	{
+		sort_paths(&file_and_dirs[DIRS], s_ls->flgs);
+		if (ft_lst_len(file_and_dirs[FILS]) == 0 &&
+				ft_lst_len(file_and_dirs[DIRS]) == 1)
+			if (!s_ls->flgs->R)
+				s_ls->one_dir = 1;
+		ft_ls(s_ls, file_and_dirs[DIRS], NULL);
+	}
+	if (no_error_operands && (!file_and_dirs[DIRS] && !file_and_dirs[FILS]))
+	{
+		s_ls->one_dir = 1;
+		fill_path_lst(&file_and_dirs[DIRS], ".");
+		ft_ls(s_ls, file_and_dirs[DIRS], NULL);
+	}
+}
+
 int		main(int argc, char **argv)
 {
-	static t_flags	flgs;
+	static t_flags		flgs;
 	static t_col_len	padding;
-	static t_ft_ls	s_ls;
-	int 			no_errors_and_valid_args;
+	static t_ft_ls		s_ls;
+	t_list				**file_and_dirs;
+	int 				no_error_operands;
 
-	s_ls.flgs = &flgs;
-	s_ls.padding = &padding;
-	s_ls.first_print = 1;
-	no_errors_and_valid_args = parse_input(argc, argv, &s_ls);
-	if (s_ls.lst_dir_paths || s_ls.lst_fil_names)
-	{
-		if (ft_lst_len(s_ls.lst_fil_names) == 0 && ft_lst_len(s_ls.lst_dir_paths) == 1)
-			if (!s_ls.flgs->R)
-				s_ls.one_dir = 1;
-		ft_ls(s_ls);
-	}
-	else if (no_errors_and_valid_args)
-	{
-		s_ls.no_ops = 1;
-		fill_path_lst(&s_ls.lst_dir_paths, "./");
-		ft_ls(s_ls);
-	}
+	file_and_dirs = malloc(sizeof(t_list *) * 2);
+	init_base_structs(&s_ls, &flgs, &padding, file_and_dirs);
+	no_error_operands = parse_input(argc, argv, file_and_dirs, s_ls.flgs);
+	ft_ls_start(&s_ls, file_and_dirs, no_error_operands);
+	free(file_and_dirs);
 	return 0;
 }

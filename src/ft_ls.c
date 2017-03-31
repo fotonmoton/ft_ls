@@ -32,17 +32,17 @@ char 	get_file_type(t_dir_elm *d_elm)
 	char 	ch;
 
 	ch = '-';
-	if (S_ISDIR(d_elm->stat_buf_struc->st_mode))
+	if (S_ISDIR(d_elm->stat_copy->st_mode))
 		ch = 'd';
-	if (S_ISLNK(d_elm->stat_buf_struc->st_mode))
+	if (S_ISLNK(d_elm->stat_copy->st_mode))
 		ch = 'l';
-	if (S_ISFIFO(d_elm->stat_buf_struc->st_mode))
+	if (S_ISFIFO(d_elm->stat_copy->st_mode))
 		ch = 'p';
-	if (S_ISSOCK(d_elm->stat_buf_struc->st_mode))
+	if (S_ISSOCK(d_elm->stat_copy->st_mode))
 		ch = 's';
-	if (S_ISBLK(d_elm->stat_buf_struc->st_mode))
+	if (S_ISBLK(d_elm->stat_copy->st_mode))
 		ch = 'b';
-	if (S_ISCHR(d_elm->stat_buf_struc->st_mode))
+	if (S_ISCHR(d_elm->stat_copy->st_mode))
 		ch = 'c';
 	return (ch);
 }
@@ -59,7 +59,7 @@ void	get_file_permissions(char *attr_str, t_dir_elm *d_elm)
 	w = 'w';
 	x = 'x';
 	f = '-';
-	st = d_elm->stat_buf_struc;
+	st = d_elm->stat_copy;
 	attr_str[0] = (st->st_mode & S_IRUSR) ? r : f;
 	attr_str[1] = (st->st_mode & S_IWUSR) ? w : f;
 	attr_str[2] = (st->st_mode & S_IXUSR) ? x : f;
@@ -88,133 +88,188 @@ char	*get_time(t_dir_elm *d_elm)
 	char	*time;
 	char	*time_tmp;
 
-	time_tmp = ctime(&(d_elm->stat_buf_struc->st_mtim.tv_sec));
+	time_tmp = ctime(&(d_elm->stat_copy->st_mtim.tv_sec));
 	time_tmp[16] = 0;
 	time = ft_strdup(time_tmp + 4);
 	return (time);
 }
 
-void	get_padding(t_ft_ls *s_ls, t_dir_elm *d_elem)
+void	get_max_padd(t_ft_ls *s_ls, t_dir_elm *d_elem)
 {
-	int 	links_len;
-	int 	name_len;
-	int 	group_len;
-	int 	size_len;
-
-	links_len = ft_num_len(d_elem->stat_buf_struc->st_nlink);
-	name_len = (int)ft_strlen(d_elem->u_name);
-	group_len = (int)ft_strlen(d_elem->g_name);
-	size_len = ft_num_len(d_elem->stat_buf_struc->st_size);
-	if (links_len > s_ls->padding->link_col)
-		s_ls->padding->link_col = links_len;
-	if (name_len > s_ls->padding->name_col)
-		s_ls->padding->name_col = name_len;
-	if (group_len > s_ls->padding->group_col)
-		s_ls->padding->group_col = group_len;
-	if (size_len > s_ls->padding->size_col)
-		s_ls->padding->size_col = size_len;
+	if (d_elem && s_ls)
+	{
+		if (d_elem->cols_padd.link_col > s_ls->max_cols_padd->link_col)
+			s_ls->max_cols_padd->link_col = d_elem->cols_padd.link_col;
+		if (d_elem->cols_padd.name_col > s_ls->max_cols_padd->name_col)
+			s_ls->max_cols_padd->name_col = d_elem->cols_padd.name_col;
+		if (d_elem->cols_padd.group_col > s_ls->max_cols_padd->group_col)
+			s_ls->max_cols_padd->group_col = d_elem->cols_padd.group_col;
+		if (d_elem->cols_padd.size_col > s_ls->max_cols_padd->size_col)
+			s_ls->max_cols_padd->size_col = d_elem->cols_padd.size_col;
+	}
 }
 
-void	get_info_from_stat(t_dir_elm *dir_elm, t_ft_ls *s_ls)
+void	get_info_from_stat(t_dir_elm *dir_elm)
 {
 	dir_elm->attr_str = get_attr(dir_elm);
-	dir_elm->u_name = ft_strdup(getpwuid(dir_elm->stat_buf_struc->st_uid)->pw_name);
-	dir_elm->g_name = ft_strdup(getgrgid(dir_elm->stat_buf_struc->st_gid)->gr_name);
+	dir_elm->u_name = ft_strdup(getpwuid(dir_elm->stat_copy->st_uid)->pw_name);
+	dir_elm->g_name = ft_strdup(getgrgid(dir_elm->stat_copy->st_gid)->gr_name);
 	dir_elm->m_time = get_time(dir_elm);
-	get_padding(s_ls, dir_elm);
 }
 
+void	set_columns_padd(t_dir_elm *de)
+{
+	de->cols_padd.link_col = ft_num_len(de->stat_copy->st_nlink);
+	de->cols_padd.name_col = (int)ft_strlen(de->u_name);
+	de->cols_padd.group_col = (int)ft_strlen(de->g_name);
+	de->cols_padd.size_col = ft_num_len(de->stat_copy->st_size);
+}
 
-void init_file_meta_lst(t_ft_ls *s_ls, char *full_path)
+t_list *read_stat(char *full_path, char *filename, t_ft_ls *s_ls)
 {
 	t_dir_elm		de;
-	char 			*tmp_path;
-	t_list			*lst_rnr;
+	char 			*tmp_file_path;
 
-	lst_rnr = s_ls->lst_fil_names;
-	s_ls->lst_fil_meta = NULL;
-	while (lst_rnr)
+	de.elm_name = ft_strdup(filename);
+	if (s_ls->flgs->l)
 	{
-		de.stat_buf_struc = malloc(sizeof(struct stat));
-		de.elm_name = (char *)lst_rnr->content;
-		tmp_path = get_full_path(full_path, de.elm_name);
-		stat(tmp_path, de.stat_buf_struc);
-		get_info_from_stat(&de, s_ls);
-		ft_lstadd(&s_ls->lst_fil_meta, ft_lstnew(&de, sizeof(t_dir_elm)));
-		free(tmp_path);
-		lst_rnr = lst_rnr->next;
+		tmp_file_path = get_full_path(full_path, filename);
+		de.stat_copy = malloc(sizeof(struct stat));
+		lstat(tmp_file_path, de.stat_copy);
+		if (S_ISLNK(de.stat_copy->st_mode))
+		{
+			de.link_name = ft_strnew(PATH_MAX);
+			if (readlink(tmp_file_path, de.link_name, PATH_MAX) == -1)
+				put_error(0);
+		}
+		get_info_from_stat(&de);
+		set_columns_padd(&de);
+		free(tmp_file_path);
 	}
+	return (ft_lstnew(&de, sizeof(t_dir_elm)));
 }
 
-t_list	*extract_filenames_from_dir(char *full_path)
+t_list *init_content_node(char *full_path, char *filename, t_ft_ls *s_ls)
 {
-	DIR				*dp;
-	struct dirent	*dir_ent;
-	t_list			*dir_files;
-
-	dp = opendir(full_path);
-	dir_files = NULL;
-	if (dp != NULL)
-		while ((dir_ent = readdir(dp)))
-			fill_path_lst(&dir_files, dir_ent->d_name);
-	closedir(dp);
-	return (dir_files);
+	if (s_ls->flgs->a)
+		return (read_stat(full_path, filename, s_ls));
+	else if (*filename != '.')
+		return (read_stat(full_path, filename, s_ls));
+	return (NULL);
 }
 
-t_ft_ls		extract_dirs_from_filenames(t_ft_ls s_ls, char *full_path)
+t_list *extract_dirs_from_filenames(char *full_path, t_ft_ls *s_ls)
 {
 	char 		*full_path_with_file;
+	t_dir_elm	*dir_elm;
+	t_list		*dir_paths;
+	t_list		*dir_content;
 
-	s_ls.lst_dir_paths = NULL;
-	while (s_ls.lst_fil_names)
+	dir_content = s_ls->lst_dir_content;
+	dir_paths = NULL;
+	while (dir_content)
 	{
-		full_path_with_file = get_full_path(full_path, s_ls.lst_fil_names->content);
-		if (access(full_path_with_file, F_OK))
-			if (access(full_path_with_file, R_OK) && (ft_strcmp(s_ls.lst_fil_names->content, ".") != 0) && (ft_strcmp(s_ls.lst_fil_names->content, "..") != 0))
-			{
-				if (s_ls.flgs->a)
-					fill_path_lst(&s_ls.lst_dir_paths, s_ls.lst_fil_names->content);
-				else if (*(char *)s_ls.lst_fil_names->content != '.')
-					fill_path_lst(&s_ls.lst_dir_paths, s_ls.lst_fil_names->content);
-			}
-		s_ls.lst_fil_names = s_ls.lst_fil_names->next;
+		dir_elm = (t_dir_elm *)dir_content->content;
+		full_path_with_file = get_full_path(full_path, dir_elm->elm_name);
+//		if (S_ISDIR(dir_elm->stat_copy->st_mode) && (ft_strcmp(dir_elm->elm_name, ".") != 0) && (ft_strcmp(dir_elm->elm_name, "..") != 0))
+//		{
+//			if (s_ls->flgs->a)
+//				fill_path_lst(&dir_paths, dir_elm->elm_name);
+//			else if (*dir_elm->elm_name != '.')
+//				fill_path_lst(&dir_paths, dir_elm->elm_name);
+//		}
+		if (opendir(full_path_with_file) && (ft_strcmp(dir_elm->elm_name, ".") != 0) && (ft_strcmp(dir_elm->elm_name, "..") != 0))
+		{
+			if (s_ls->flgs->a)
+				fill_path_lst(&dir_paths, dir_elm->elm_name);
+			else if (*dir_elm->elm_name != '.')
+				fill_path_lst(&dir_paths, dir_elm->elm_name);
+		}
+		dir_content = dir_content->next;
 		free(full_path_with_file);
 	}
-	return (s_ls);
+	return (dir_paths);
 }
 
-void ft_ls_dir(t_ft_ls s_ls, char *full_path)
+void	get_padding_and_blocks(t_ft_ls *s_ls, t_dir_elm *d_elem)
 {
-	char 		*full_path_next;
-	t_list		*tmp_rnr;
-
-	sort_dirs(&s_ls.lst_dir_paths, s_ls.flgs);
-	tmp_rnr = s_ls.lst_dir_paths;
-	while (tmp_rnr)
+	if (d_elem && s_ls)
 	{
-		full_path_next = get_full_path(full_path, tmp_rnr->content);
-		s_ls.lst_fil_names = extract_filenames_from_dir(full_path_next);
-		ft_ls_fil(&s_ls, full_path_next);
-		if (s_ls.flgs->R)
-			ft_ls_dir(extract_dirs_from_filenames(s_ls, full_path_next), full_path_next);
-		tmp_rnr = tmp_rnr->next;
+		if (d_elem->cols_padd.link_col > s_ls->max_cols_padd->link_col)
+			s_ls->max_cols_padd->link_col = d_elem->cols_padd.link_col;
+		if (d_elem->cols_padd.name_col > s_ls->max_cols_padd->name_col)
+			s_ls->max_cols_padd->name_col = d_elem->cols_padd.name_col;
+		if (d_elem->cols_padd.group_col > s_ls->max_cols_padd->group_col)
+			s_ls->max_cols_padd->group_col = d_elem->cols_padd.group_col;
+		if (d_elem->cols_padd.size_col > s_ls->max_cols_padd->size_col)
+			s_ls->max_cols_padd->size_col = d_elem->cols_padd.size_col;
+		if (d_elem->stat_copy)
+			s_ls->dir_content_total += d_elem->stat_copy->st_blocks;
 	}
 }
 
-void ft_ls_fil(t_ft_ls *s_ls, char *full_path)
+void	extract_content(char *full_path, t_ft_ls *s_ls)
 {
+	DIR				*dp;
+	struct dirent	*de;
+	t_list			*lst_elm;
 
-	init_file_meta_lst(s_ls, full_path);
-	sort_files(&s_ls->lst_fil_meta, s_ls->flgs);
-	if ((!s_ls->one_dir && !s_ls->no_ops) || s_ls->flgs->R)
-		print_full_path(s_ls, full_path);
-	output(*s_ls);
+	s_ls->lst_dir_content = NULL;
+	if ((dp = opendir(full_path)))
+	{
+		while ((de = readdir(dp)))
+		{
+				if ((lst_elm = init_content_node(full_path, de->d_name, s_ls)))
+				{
+					get_max_padd(s_ls, lst_elm->content);
+					get_padding_and_blocks(s_ls, lst_elm->content);
+					ft_lstadd(&s_ls->lst_dir_content, lst_elm);
+				}
+		}
+		closedir(dp);
+	}
+	else
+	{
+		lst_elm = init_content_node(NULL, full_path, s_ls);
+		get_max_padd(s_ls, lst_elm->content);
+		ft_lstadd(&s_ls->lst_dir_content, lst_elm);
+	}
 }
 
-void ft_ls(t_ft_ls s_ls)
+void	reset_max_cols(t_ft_ls *s_ls)
 {
-	if (s_ls.lst_fil_names)
-		ft_ls_fil(&s_ls, NULL);
-	if (s_ls.lst_dir_paths)
-		ft_ls_dir(s_ls, NULL);
+	s_ls->max_cols_padd->group_col = 0;
+	s_ls->max_cols_padd->name_col = 0;
+	s_ls->max_cols_padd->link_col = 0;
+	s_ls->max_cols_padd->size_col = 0;
+}
+
+void	print_content(t_ft_ls *s_ls, char *full_path_curr)
+{
+	t_list		*dirs;
+
+	sort_files(&s_ls->lst_dir_content, s_ls->flgs);
+	if ((!s_ls->one_dir && !s_ls->no_ops) || s_ls->flgs->R)
+		print_full_path(s_ls, full_path_curr);
+	output(s_ls);
+	if (s_ls->flgs->R)
+	{
+		dirs = extract_dirs_from_filenames(full_path_curr, s_ls);
+		reset_max_cols(s_ls);
+		ft_ls(s_ls, dirs, full_path_curr);
+	}
+}
+
+void ft_ls(t_ft_ls *s_ls, t_list *paths, char *curr_path)
+{
+	char 	*cur_filename;
+
+	sort_paths(&paths, s_ls->flgs);
+	while (paths)
+	{
+		cur_filename = get_full_path(curr_path, paths->content);
+		extract_content(cur_filename, s_ls);
+		print_content(s_ls, cur_filename);
+		paths = paths->next;
+	}
 }

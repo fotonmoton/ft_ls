@@ -24,7 +24,7 @@ void	fill_path_lst(t_list **path_lst, char *path)
 	ft_lstadd(path_lst, ft_lstnew(path, ft_strlen(path) + 1));
 }
 
-int parse_input(int ac, char **av, t_ft_ls *ft_ls_strct)
+int parse_input(int ac, char **av, t_list **file_and_dirs, t_flags *flgs)
 {
 	int 	i;
 	int 	open_type;
@@ -36,13 +36,13 @@ int parse_input(int ac, char **av, t_ft_ls *ft_ls_strct)
 		return (no_errors);
 	while (i < ac - 1)
 	{
-		if (chck_flgs(av[i + 1], ft_ls_strct->flgs))
+		if (chck_flgs(av[i + 1], flgs))
 		{
 			open_type = chck_opn(av[i + 1]);
 			if (open_type == 0)
-				fill_path_lst(&ft_ls_strct->lst_fil_names, av[i + 1]);
+				fill_path_lst(&file_and_dirs[FILS], av[i + 1]);
 			else if (open_type == 1)
-				fill_path_lst(&ft_ls_strct->lst_dir_paths, av[i + 1]);
+				fill_path_lst(&file_and_dirs[DIRS], av[i + 1]);
 			else if (open_type == -1)
 				no_errors = 0;
 		}
