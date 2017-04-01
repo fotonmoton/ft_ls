@@ -65,7 +65,7 @@ FLAGS :=			$(CC_FLAGS)		\
 
 # compiler
 
-CC =				clang
+CC =				gcc
 
 # rules
 
@@ -73,12 +73,12 @@ all: $(NAME)
 
 $(NAME): $(LIBFT_DIR)$(LIBFT) $(OBJ)
 	@echo "$(CYAN)Linking binary...$(NORMAL)"
-	@$(CC) $(OBJ) $(FLAGS) -o $(NAME)
+	@$(CC) $(OBJ) $(DEBUG) $(FLAGS) -o $(NAME)
 	@echo "$(GREEN)Done!$(NORMAL)"
 
 $(OBJ_DIR)%.o: $(SRC_DIR)%.c $(FT_LS_INC)$(FT_LS_HEADER)
 	@echo "$(CYAN)Compiling object files: $(BLUE)$@$(NORMAL)"
-	@$(CC) $(CC_FLAGS) $(OPT) $(INC) -c $< -o $@  
+	@$(CC) $(CC_FLAGS) $(INC) -c $< -o $@  
 
 $(LIBFT_DIR)$(LIBFT):
 	@echo "$(CYAN)Compiling libft library...$(NORMAL)"

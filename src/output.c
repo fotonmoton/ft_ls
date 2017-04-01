@@ -73,7 +73,7 @@ void	long_format(t_list *lst_d_elm, t_ft_ls *s_ls)
 void	one_line(t_list *lst_d_elm, t_ft_ls *s_ls)
 {
 	ft_putstr(((t_dir_elm *)lst_d_elm->content)->elm_name);
-	s_ls = 0;
+	s_ls = s_ls;
 	if (lst_d_elm->next)
 		ft_putstr("  ");
 	else
@@ -82,7 +82,7 @@ void	one_line(t_list *lst_d_elm, t_ft_ls *s_ls)
 
 void	one_column(t_list *lst_d_elm, t_ft_ls *s_ls)
 {
-	s_ls = 0;
+	s_ls = s_ls;
 	ft_putstr(((t_dir_elm *)lst_d_elm->content)->elm_name);
 	ft_putstr("\n");
 }
