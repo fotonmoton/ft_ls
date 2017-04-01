@@ -79,6 +79,7 @@ SRC = ft_memset.c		    \
 	  ft_lstadd_back.c	    \
 	  ft_lst_len.c          \
 	  ft_lst_merge_sort.c   \
+	  ft_lst_rev.c			\
 						    \
 	  ft_realloc.c		    \
 	  ft_read_file.c        \

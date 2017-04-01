@@ -30,25 +30,24 @@ void	ft_ls_start(t_ft_ls *s_ls, t_list **file_and_dirs, int no_error_operands)
 	if (file_and_dirs[FILS])
 	{
 		s_ls->files_print = 1;
-		sort_paths(&file_and_dirs[FILS], s_ls->flgs);
-		ft_ls(s_ls, file_and_dirs[FILS], NULL);
+		ft_ls_fil(s_ls, operands_parse(file_and_dirs[FILS], s_ls));
 		s_ls->files_print = 0;
 		s_ls->first_print = 0;
 	}
 	if (file_and_dirs[DIRS])
 	{
-		sort_paths(&file_and_dirs[DIRS], s_ls->flgs);
+		sort_paths(&file_and_dirs[DIRS]);
 		if (ft_lst_len(file_and_dirs[FILS]) == 0 &&
 				ft_lst_len(file_and_dirs[DIRS]) == 1)
 			if (!s_ls->flgs->R)
 				s_ls->one_dir = 1;
-		ft_ls(s_ls, file_and_dirs[DIRS], NULL);
+		ft_ls_dir(s_ls, operands_parse(file_and_dirs[DIRS], s_ls), NULL);
 	}
 	if (no_error_operands && (!file_and_dirs[DIRS] && !file_and_dirs[FILS]))
 	{
 		s_ls->one_dir = 1;
 		fill_path_lst(&file_and_dirs[DIRS], ".");
-		ft_ls(s_ls, file_and_dirs[DIRS], NULL);
+		ft_ls_dir(s_ls, operands_parse(file_and_dirs[DIRS], s_ls), NULL);
 	}
 }
 
@@ -64,6 +63,8 @@ int		main(int argc, char **argv)
 	init_base_structs(&s_ls, &flgs, &padding, file_and_dirs);
 	no_error_operands = parse_input(argc, argv, file_and_dirs, s_ls.flgs);
 	ft_ls_start(&s_ls, file_and_dirs, no_error_operands);
+	free(file_and_dirs[FILS]);
+	free(file_and_dirs[DIRS]);
 	free(file_and_dirs);
 	return 0;
 }

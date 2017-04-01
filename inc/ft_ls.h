@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_ls.h                                            :+:      :+:    :+:   */
+/*   ft_ls_dir.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gtertysh <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -62,7 +62,6 @@ typedef struct 		s_dir_elm
 
 typedef struct 		s_ft_ls
 {
-	t_list			*lst_dir_content;
 	t_flags			*flgs;
 	t_col_len		*max_cols_padd;
 	int 			dir_content_total;
@@ -72,9 +71,13 @@ typedef struct 		s_ft_ls
 	int 			files_print;
 }					t_ft_ls;
 
-void				ft_ls(t_ft_ls *s_ls, t_list *paths, char *curr_path);
+void				ft_ls_dir(t_ft_ls *s_ls, t_list *root, char *parent_dir);
+void				ft_ls_fil(t_ft_ls *s_ls, t_list *root);
 
-void 				print_content(t_ft_ls *s_ls, char *full_path_curr);
+t_list				*operands_parse(t_list *ops, t_ft_ls *s_ls);
+
+void				print_content(t_ft_ls *s_ls, t_list *curr_dir_content,
+								  char *cur_path);
 
 int					parse_input(int ac, char **av, t_list **file_and_dirs,
 								   t_flags *flgs);
@@ -83,10 +86,10 @@ t_list				*init_content_node(char *full_path, char *filename,
 										 t_ft_ls *s_ls);
 
 void				fill_path_lst(t_list **path_lst, char *path);
-void				sort_files(t_list **del, t_flags *flgs);
-void				sort_paths(t_list **dirs, t_flags *flgs);
+void				sort_content(t_list **del, t_flags *flgs);
+void				sort_paths(t_list **paths);
 
-void				output(t_ft_ls *s_ls);
+void				output(t_ft_ls *s_ls, t_list *curr_dir_content);
 void				print_full_path(t_ft_ls *s_ls, char *path);
 
 int					chck_flgs(char *flg, t_flags *flgs);

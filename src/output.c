@@ -73,18 +73,25 @@ void	long_format(t_list *lst_d_elm, t_ft_ls *s_ls)
 void	one_line(t_list *lst_d_elm, t_ft_ls *s_ls)
 {
 	ft_putstr(((t_dir_elm *)lst_d_elm->content)->elm_name);
-	s_ls = s_ls;
+	s_ls = 0;
 	if (lst_d_elm->next)
 		ft_putstr("  ");
 	else
 		ft_putstr("\n");
 }
 
-void	out(t_ft_ls *s_ls, void (*format_fun)(t_list *, t_ft_ls *))
+void	one_column(t_list *lst_d_elm, t_ft_ls *s_ls)
+{
+	s_ls = 0;
+	ft_putstr(((t_dir_elm *)lst_d_elm->content)->elm_name);
+	ft_putstr("\n");
+}
+
+void	out(t_ft_ls *s_ls, t_list *cdc, void (*format_fun)(t_list *, t_ft_ls *))
 {
 	t_list		*lst_rnr;
 
-	lst_rnr = s_ls->lst_dir_content;
+	lst_rnr = cdc;
 	while (lst_rnr)
 	{
 		if (s_ls->flgs->a)
@@ -95,16 +102,18 @@ void	out(t_ft_ls *s_ls, void (*format_fun)(t_list *, t_ft_ls *))
 	}
 }
 
-void output(t_ft_ls *s_ls)
+void output(t_ft_ls *s_ls, t_list *curr_dir_content)
 {
 	if (s_ls->flgs->l)
 	{
 		if (!s_ls->files_print)
-			put_total(s_ls->dir_content_total);
-		out(s_ls, long_format);
+			put_total(s_ls->dir_content_total / 2);
+		out(s_ls, curr_dir_content, long_format);
 	}
+	else if (s_ls->flgs->col)
+		out(s_ls, curr_dir_content, one_column);
 	else
-		out(s_ls, one_line);
+		out(s_ls, curr_dir_content, one_line);
 //	else if (s_ls.flgs->col)
 //		one_column(s_ls);
 //	else

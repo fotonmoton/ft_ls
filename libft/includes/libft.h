@@ -106,6 +106,7 @@ t_list				*ft_lstfind(t_list *lst, void *data, size_t size);
 t_list				*ft_lst_at(t_list *l, unsigned int at);
 void				ft_lstadd_back(t_list **l, void *data, size_t size);
 void				ft_lst_merge_sort(t_list **head_ptr, int (*cmp)());
+void				ft_lst_rev(t_list **begin_list);
 
 void				*ft_realloc(void *old, unsigned int new_size,
 											unsigned int old_size);

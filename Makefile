@@ -43,7 +43,7 @@ OBJ =				$(addprefix $(OBJ_DIR), $(OBJ_FILES))
 
 # header files and directories
 
-HEADER =			ft_ls.h
+HEADER =			ft_ls_dir.h
 FT_LS_INC =			./inc/
 LIBFT_INC =			$(LIBFT_DIR)includes/
 INC =				-I $(LIBFT_DIR)includes/ -I $(FT_LS_INC) 
@@ -65,7 +65,7 @@ FLAGS :=			$(CC_FLAGS)		\
 
 # compiler
 
-CC =				gcc
+CC =				clang
 
 # rules
 

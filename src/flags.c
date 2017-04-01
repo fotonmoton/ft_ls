@@ -16,6 +16,7 @@ void	chck_short_flgs(char *flg, t_flags *flgs)
 	if (flgs->a == 0) flgs->a = (ft_strchr(flg, 'a') != NULL) ? 1 : 0;
 	if (flgs->R == 0) flgs->R = (ft_strchr(flg, 'R') != NULL) ? 1 : 0;
 	if (flgs->t == 0) flgs->t = (ft_strchr(flg, 't') != NULL) ? 1 : 0;
+	if (flgs->r == 0) flgs->r = (ft_strchr(flg, 'r') != NULL) ? 1 : 0;
 	if (flgs->col == 0) flgs->col = (ft_strchr(flg, '1') != NULL) ? 1 : 0;
 }
 

@@ -76,7 +76,7 @@ void	by_type_and_name(t_list **del)
 
 }
 
-void	sort_files(t_list **del, t_flags *flgs)
+void	sort_content(t_list **del, t_flags *flgs)
 {
 	if (flgs->t)
 		ft_lst_merge_sort(del, by_m_time);
@@ -84,12 +84,12 @@ void	sort_files(t_list **del, t_flags *flgs)
 		ft_lst_merge_sort(del, by_name_lex);
 	else
 		ft_lst_merge_sort(del, by_name);
+	if (flgs->r)
+		ft_lst_rev(del);
 }
 
-void	sort_paths(t_list **dirs, t_flags *flgs)
+void sort_paths(t_list **paths)
 {
-	if (flgs->abn)
-		ft_lst_merge_sort(dirs, path_by_name_lex);
-	else
-		ft_lst_merge_sort(dirs, path_by_name);
+
+		ft_lst_merge_sort(paths, path_by_name);
 }
