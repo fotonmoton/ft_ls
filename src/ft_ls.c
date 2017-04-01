@@ -19,8 +19,7 @@ int     is_hidden(char *path)
 		else if (*(end + 1) == '.')
 			return (1);
 	}
-	else
-	if (*end == '.')
+	else if (*end == '.')
 		return (1);
 	return (0);
 }
@@ -114,7 +113,7 @@ char	*get_time(t_dir_elm *d_elm)
 	char	*time;
 	char	*time_tmp;
 
-	time_tmp = ctime(&(d_elm->stat_copy->st_mtim.tv_sec));
+	time_tmp = ctime(&(d_elm->stat_copy->st_mtimespec.tv_sec));
 	time_tmp[16] = 0;
 	time = ft_strdup(time_tmp + 4);
 	return (time);
@@ -145,12 +144,14 @@ void 	to_null(t_dir_elm *de)
 	de->g_name = NULL;
 	de->u_name = NULL;
 	de->m_time = NULL;
+	de->elm_name = NULL;
 }
 
 t_list *read_stat(char *full_path, char *filename, t_ft_ls *s_ls)
 {
 	t_dir_elm		de;
-	char 			*tmp_file_path;;
+	char 			*tmp_file_path;
+	t_list			*node;
 
 	to_null(&de);
 	de.elm_name = ft_strdup(filename);
@@ -171,14 +172,15 @@ t_list *read_stat(char *full_path, char *filename, t_ft_ls *s_ls)
 		get_info_from_stat(&de);
 		set_columns_padd(&de);
 	}
-	return (ft_lstnew(&de, sizeof(t_dir_elm)));
+	node = ft_lstnew(&de, sizeof(t_dir_elm));
+	return (node);
 }
 
 t_list *init_content_node(char *full_path, char *filename, t_ft_ls *s_ls)
 {
 	if (s_ls->flgs->a)
 		return (read_stat(full_path, filename, s_ls));
-	else if (!is_hidden(filename) || ft_strcmp(filename, ".") == 0)
+	else if (!is_hidden(filename) || ft_strcmp(filename, "./") == 0)
 		return (read_stat(full_path, filename, s_ls));
 	return (NULL);
 }
@@ -198,7 +200,7 @@ t_list *find_dirs(char *full_path, t_ft_ls *s_ls, t_list *curr_dir_content)
 		{
 			if (s_ls->flgs->a)
 				ft_lstadd(&dirs, ft_lstnew(dir_elm, sizeof(t_dir_elm)));
-			else if (*dir_elm->elm_name != '.')
+			else if (!is_hidden(dir_elm->elm_name))
 				ft_lstadd(&dirs, ft_lstnew(dir_elm, sizeof(t_dir_elm)));
 		}
 		curr_dir_content = curr_dir_content->next;
@@ -220,7 +222,12 @@ void	get_padding_and_blocks(t_ft_ls *s_ls, t_dir_elm *d_elem)
 		if (d_elem->cols_padd.size_col > s_ls->max_cols_padd->size_col)
 			s_ls->max_cols_padd->size_col = d_elem->cols_padd.size_col;
 		if (d_elem->stat_copy)
-			s_ls->dir_content_total += d_elem->stat_copy->st_blocks;
+		{
+			if (s_ls->flgs->a)
+				s_ls->dir_content_total += d_elem->stat_copy->st_blocks * 2;
+			else if (!is_hidden(d_elem->elm_name))
+				s_ls->dir_content_total += d_elem->stat_copy->st_blocks * 2;
+		}
 	}
 }
 
@@ -230,16 +237,15 @@ void	extract_content(char *full_path, t_ft_ls *s_ls, t_list **dir_content)
 	struct dirent	*de;
 	t_list			*lst_elm;
 
-	*dir_content = NULL;
 	if ((dp = opendir(full_path)))
 	{
 		while ((de = readdir(dp)))
 		{
-				if ((lst_elm = init_content_node(full_path, de->d_name, s_ls)))
-				{
-					get_padding_and_blocks(s_ls, lst_elm->content);
-					ft_lstadd(dir_content, lst_elm);
-				}
+			if ((lst_elm = init_content_node(full_path, de->d_name, s_ls)))
+			{
+				get_padding_and_blocks(s_ls, lst_elm->content);
+				ft_lstadd(dir_content, lst_elm);
+			}
 		}
 		closedir(dp);
 	}
@@ -271,12 +277,17 @@ t_list	*operands_parse(t_list *ops, t_ft_ls *s_ls)
 	tmp_rnr = ops;
 	while (tmp_rnr)
 	{
+		if (ft_strcmp(tmp_rnr->content, ".") == 0)
+		{
+			free(tmp_rnr->content);
+			tmp_rnr->content = ft_strdup("./");
+		}
 		if ((lst_elm = init_content_node(NULL, tmp_rnr->content, s_ls)))
 		{
 			get_padding_and_blocks(s_ls, lst_elm->content);
 			ft_lstadd(&root, lst_elm);
-			tmp_rnr = tmp_rnr->next;
 		}
+		tmp_rnr = tmp_rnr->next;
 	}
 	return (root);
 }
@@ -286,6 +297,7 @@ void	free_struct_lst(t_list *curr_cont)
 {
 	t_dir_elm	*tmp;
 	t_list		*tmp1;
+
 	while (curr_cont)
 	{
 		tmp1 = curr_cont->next;
@@ -293,11 +305,11 @@ void	free_struct_lst(t_list *curr_cont)
 		{
 			tmp = (t_dir_elm *)curr_cont->content;
 			free(tmp->attr_str);
+			free(tmp->link_name);
 			free(tmp->elm_name);
 			free(tmp->g_name);
 			free(tmp->u_name);
 			free(tmp->m_time);
-			free(tmp->link_name);
 			free(tmp->stat_copy);
 			free(tmp);
 		}
@@ -317,7 +329,9 @@ void	ft_ls_dir(t_ft_ls *s_ls, t_list *root, char *parent_dir)
 {
 	char		*cur_path;
 	t_list		*curr_dir_content;
+	t_list		*fuckin_head;
 
+	fuckin_head = root;
 	curr_dir_content = NULL;
 	sort_content(&root, s_ls->flgs);
 	reset_s_ls(s_ls);
@@ -329,12 +343,14 @@ void	ft_ls_dir(t_ft_ls *s_ls, t_list *root, char *parent_dir)
 		{
 			sort_content(&curr_dir_content, s_ls->flgs);
 			print_content(s_ls, curr_dir_content, cur_path);
+			if (s_ls->flgs->R)
+			{
+				ft_ls_dir(s_ls, find_dirs(cur_path, s_ls, curr_dir_content), cur_path);
+				free_struct_lst(curr_dir_content);
+			}
 		}
-		if (s_ls->flgs->R)
-			ft_ls_dir(s_ls, find_dirs(cur_path, s_ls, curr_dir_content), cur_path);
-		root = root->next;
 		free(cur_path);
+		root = root->next;
 	}
-	free_struct_lst(curr_dir_content);
-	free_struct_lst(root);
+	free_struct_lst(fuckin_head);
 }

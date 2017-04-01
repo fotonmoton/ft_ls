@@ -14,6 +14,24 @@
 
 // complide with -O3 flag!!
 
+
+void	free_str_lst(t_list *curr_cont)
+{
+	char	*tmp;
+	t_list		*tmp1;
+	while (curr_cont)
+	{
+		tmp1 = curr_cont->next;
+		if (curr_cont->content)
+		{
+			tmp = (char *)curr_cont->content;
+			free(tmp);
+		}
+		free(curr_cont);
+		curr_cont = tmp1;
+	}
+}
+
 void	init_base_structs(t_ft_ls *s_ls, t_flags *flgs, t_col_len *padd,
 						  t_list **fil_dir)
 {
@@ -23,6 +41,7 @@ void	init_base_structs(t_ft_ls *s_ls, t_flags *flgs, t_col_len *padd,
 	s_ls->max_cols_padd = padd;
 	s_ls->first_print = 1;
 	s_ls->files_print = 0;
+	s_ls->dir_content_total = 0;
 }
 
 void	ft_ls_start(t_ft_ls *s_ls, t_list **file_and_dirs, int no_error_operands)
@@ -46,7 +65,7 @@ void	ft_ls_start(t_ft_ls *s_ls, t_list **file_and_dirs, int no_error_operands)
 	if (no_error_operands && (!file_and_dirs[DIRS] && !file_and_dirs[FILS]))
 	{
 		s_ls->one_dir = 1;
-		fill_path_lst(&file_and_dirs[DIRS], ".");
+		fill_path_lst(&file_and_dirs[DIRS], "./");
 		ft_ls_dir(s_ls, operands_parse(file_and_dirs[DIRS], s_ls), NULL);
 	}
 }
@@ -63,8 +82,10 @@ int		main(int argc, char **argv)
 	init_base_structs(&s_ls, &flgs, &padding, file_and_dirs);
 	no_error_operands = parse_input(argc, argv, file_and_dirs, s_ls.flgs);
 	ft_ls_start(&s_ls, file_and_dirs, no_error_operands);
-	free(file_and_dirs[FILS]);
-	free(file_and_dirs[DIRS]);
+	free_str_lst(file_and_dirs[FILS]);
+	free_str_lst(file_and_dirs[DIRS]);
 	free(file_and_dirs);
+//	while (1)
+//		;
 	return 0;
 }

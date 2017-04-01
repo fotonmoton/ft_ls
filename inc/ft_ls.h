@@ -24,6 +24,7 @@
 # include <grp.h>
 # include <sys/types.h>
 # include <errno.h>
+# include <limits.h>
 
 # define FILS 0
 # define DIRS 1

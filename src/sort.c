@@ -36,10 +36,10 @@ int 	by_m_time(t_dir_elm *a, t_dir_elm *b)
 {
 	long 	dif;
 
-	dif = a->stat_copy->st_mtim.tv_sec - b->stat_copy->st_mtim.tv_sec;
+	dif = a->stat_copy->st_mtimespec.tv_sec - b->stat_copy->st_mtimespec.tv_sec;
 	if (!dif)
-		dif = a->stat_copy->st_mtim.tv_nsec -
-				b->stat_copy->st_mtim.tv_nsec;
+		dif = a->stat_copy->st_mtimespec.tv_nsec -
+				b->stat_copy->st_mtimespec.tv_nsec;
 	if (dif < 0)
 		return (0);
 	else if (dif > 0)
