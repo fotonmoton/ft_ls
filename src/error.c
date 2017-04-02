@@ -1,25 +1,22 @@
-#include "ft_ls.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   error.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: gtertysh <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2017/04/02 06:29:46 by gtertysh          #+#    #+#             */
+/*   Updated: 2017/04/02 06:30:08 by gtertysh         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-//void	cannot_acces(char *arg)
-//{
-//	char 	*ls_ca_quo;
-//	char 	*ls_ca;
-//
-//	ls_ca = ft_strjoin("ls: cannot access '", arg);
-//	ls_ca_quo = ft_strjoin(ls_ca, "'");
-//	perror(ls_ca_quo);
-//	free(ls_ca_quo);
-//	free(ls_ca);
-//}
+#include "ft_ls.h"
 
 void	put_error(char *arg)
 {
-	char 	*ls_ca_quo;
-	char 	*ls_ca;
+	char	*ls_arg;
 
-	ls_ca = ft_strjoin("ls: cannot access '", arg);
-	ls_ca_quo = ft_strjoin(ls_ca, "'");
-	perror(ls_ca_quo);
-	free(ls_ca_quo);
-	free(ls_ca);
+	ls_arg = ft_strjoin("ls: ", arg);
+	perror(ls_arg);
+	free(ls_arg);
 }

@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   parse_input.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: gtertysh <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2017/04/02 02:29:34 by gtertysh          #+#    #+#             */
+/*   Updated: 2017/04/02 02:29:37 by gtertysh         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ft_ls.h"
 
-int 	chck_opn(char *path)
+int		chck_opn(char *path)
 {
 	DIR		*d_stream;
 
@@ -24,11 +36,31 @@ void	fill_path_lst(t_list **path_lst, char *path)
 	ft_lstadd(path_lst, ft_lstnew(path, ft_strlen(path) + 1));
 }
 
-int parse_input(int ac, char **av, t_list **file_and_dirs, t_flags *flgs)
+t_list	*operands_parse(t_list *ops, t_ft_ls *s_ls)
 {
-	int 	i;
-	int 	open_type;
-	int 	no_errors;
+	t_list	*tmp_rnr;
+	t_list	*root;
+	t_list	*lst_elm;
+
+	root = NULL;
+	tmp_rnr = ops;
+	while (tmp_rnr)
+	{
+		if ((lst_elm = init_content_node(NULL, tmp_rnr->content, s_ls)))
+		{
+			get_padding_and_blocks(s_ls, lst_elm->content);
+			ft_lstadd(&root, lst_elm);
+		}
+		tmp_rnr = tmp_rnr->next;
+	}
+	return (root);
+}
+
+int		parse_input(int ac, char **av, t_list **file_and_dirs, t_flags *flgs)
+{
+	int		i;
+	int		open_type;
+	int		no_errors;
 
 	i = 0;
 	no_errors = 1;

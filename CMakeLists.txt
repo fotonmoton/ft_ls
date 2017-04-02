@@ -14,7 +14,13 @@ set(SOURCE_FILES
         src/flags.c
         src/sort.c
         src/output.c
-        src/error.c) # sources
+        src/error.c
+        src/help_funcs.c
+        src/stat_routine.c
+        src/ft_ls_main_routine.c
+        src/stat_parse.c
+        src/long_output.c
+        src/sort_funcs.c) # sources
 
 add_executable(ft_ls ${SOURCE_FILES}) # compilation
 
